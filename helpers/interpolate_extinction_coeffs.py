@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
 
-df = pd.read_table( \
+df_main = pd.read_table( \
     './constants/extinction_coefficients.wsv', \
     delim_whitespace=True, \
     names=('Wavelength(nm)', 'Water(OD/M/cm)', 'HbO2 (OD/M/cm)', 'HHb (OD/M/cm)',
@@ -11,16 +11,27 @@ df = pd.read_table( \
     index_col=0 # the Wavelength(nm) column,
 )
 
-lower_thresh, upper_thresh = 700, 900
+df_lipid = pd.read_table( \
+    './constants/lipid_extinction_coefficient.wsv', \
+    delim_whitespace=True, \
+    names=('Wavelength(nm)', 'Lipid(OD/m)'), \
+    index_col=0, # the Wavelength(nm) column
+    skiprows=6
+)
+
+lower_thresh, upper_thresh = 740, 900
 wls = np.load('./data/wavelengths.npy')
 wls = wls[(wls > lower_thresh) & (wls < upper_thresh)]
 
-def interp(name):
+def interp(name, df, wavelengths=wls):
     fun = interp1d(df.index.values, df[name])
-    return fun(wls)
+    return fun(wavelengths)
 
-def extinction_coeffs():
+def extinction_coeffs(wavelengths=wls):
     names = ('Water(OD/M/cm)', 'HbO2 (OD/M/cm)', 'HHb (OD/M/cm)')
-    extintion_coeffs = np.array([interp(name) for name in names])
+    extintion_coeffs = np.array(
+        [interp(name, df_main, wavelengths=wavelengths) for name in names] +
+        [interp('Lipid(OD/m)', df_lipid*1e-2, wavelengths=wavelengths)]
+    )
 
-    return wls, extintion_coeffs
+    return wavelengths, extintion_coeffs
