@@ -3,7 +3,7 @@
     (MIT license)
 """
 
-colours = {
+colors = {
     "gray": {
         0: "#f8f9fa",
         1: "#f1f3f5",
