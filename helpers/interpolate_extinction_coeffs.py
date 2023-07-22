@@ -20,7 +20,7 @@ df_lipid = pd.read_table( \
 )
 
 lower_thresh, upper_thresh = 740, 900
-wls = np.load('./data/wavelengths.npy')
+wls = np.load('./constants/wavelengths.npy')
 wls = wls[(wls > lower_thresh) & (wls < upper_thresh)]
 
 def interp(name, df, wavelengths=wls):
